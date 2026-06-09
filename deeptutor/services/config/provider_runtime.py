@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 import json
 from typing import Any
 from urllib.parse import urlparse
+import os
 
 from deeptutor.services.model_selection import LLMSelection, apply_llm_selection_to_catalog
 from deeptutor.services.provider_registry import (
@@ -391,9 +392,14 @@ def resolve_llm_runtime_config(
     binding_hint_raw = _as_str((profile or {}).get("binding"))
     binding_hint = canonical_provider_name(binding_hint_raw)
 
-    active_api_key = _as_str((profile or {}).get("api_key"))
-    active_api_base = _as_str((profile or {}).get("base_url"))
-    active_api_version = _as_str((profile or {}).get("api_version"))
+    active_api_key = os.getenv("DEEPTUTOR_LLM_API_KEY")
+    active_api_base = os.getenv("DEEPTUTOR_LLM_API_BASE")
+    active_api_version = os.getenv("DEEPTUTOR_LLM_API_VERSION")
+
+    # active_api_key = _as_str((profile or {}).get("api_key"))
+    # active_api_base = _as_str((profile or {}).get("base_url"))
+    # active_api_version = _as_str((profile or {}).get("api_version"))
+    
     reasoning_effort = _as_str((model or {}).get("reasoning_effort")) or None
     active_extra_headers = _to_headers((profile or {}).get("extra_headers"))
     context_window = _coerce_optional_int((model or {}).get("context_window"))
