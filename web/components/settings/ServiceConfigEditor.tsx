@@ -4,8 +4,6 @@ import { useState } from "react";
 import {
   CheckCircle2,
   ChevronDown,
-  Eye,
-  EyeOff,
   Info,
   Loader2,
   Plus,
@@ -70,23 +68,11 @@ export function ServiceConfigEditor({ service }: { service: ServiceName }) {
   const activeProfile = getActiveProfile(draft, service);
   const activeModel = getActiveModel(draft, service);
 
-  const [showApiKey, setShowApiKey] = useState(false);
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
   const [editingModelId, setEditingModelId] = useState<string | null>(null);
   const [editingModelName, setEditingModelName] = useState("");
   const [editingProfileId, setEditingProfileId] = useState<string | null>(null);
   const [editingProfileName, setEditingProfileName] = useState("");
-
-  // Reset API-key visibility whenever we land on a different profile or
-  // switch services — same effect the old code had, but using React's
-  // documented "store previous prop in state" pattern so it happens during
-  // render rather than in a useEffect (which the linter forbids).
-  const profileKey = `${service}:${activeProfile?.id ?? "none"}`;
-  const [lastProfileKey, setLastProfileKey] = useState(profileKey);
-  if (lastProfileKey !== profileKey) {
-    setLastProfileKey(profileKey);
-    if (showApiKey) setShowApiKey(false);
-  }
 
   const searchProviderRaw =
     service === "search"
@@ -309,8 +295,6 @@ export function ServiceConfigEditor({ service }: { service: ServiceName }) {
               <ProfileFields
                 service={service}
                 profile={activeProfile}
-                showApiKey={showApiKey}
-                setShowApiKey={setShowApiKey}
                 showSearchProviderWarning={showSearchProviderWarning}
                 isSupportedSearchProvider={isSupportedSearchProvider}
                 isDeprecatedSearchProvider={isDeprecatedSearchProvider}
@@ -715,8 +699,6 @@ function ContextWindowDetectionBanner({
 function ProfileFields({
   service,
   profile,
-  showApiKey,
-  setShowApiKey,
   showSearchProviderWarning,
   isSupportedSearchProvider,
   isDeprecatedSearchProvider,
@@ -724,8 +706,6 @@ function ProfileFields({
 }: {
   service: ServiceName;
   profile: CatalogProfile;
-  showApiKey: boolean;
-  setShowApiKey: (next: boolean | ((prev: boolean) => boolean)) => void;
   showSearchProviderWarning: boolean;
   isSupportedSearchProvider: boolean;
   isDeprecatedSearchProvider: boolean;
@@ -835,29 +815,16 @@ function ProfileFields({
         </div>
         <div className="relative">
           <input
-            type={showApiKey ? "text" : "password"}
+            type="password"
             autoComplete="new-password"
             spellCheck={false}
-            className={`${inputClass} pr-10 font-mono`}
+            className={`${inputClass} font-mono`}
             value={profile.api_key}
             onChange={(e) =>
               updateProfileField(service, "api_key", e.target.value)
             }
             placeholder="sk-..."
           />
-          <button
-            type="button"
-            onClick={() => setShowApiKey((prev) => !prev)}
-            className="absolute right-1 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
-            aria-label={showApiKey ? t("Hide API key") : t("Show API key")}
-            title={showApiKey ? t("Hide API key") : t("Show API key")}
-          >
-            {showApiKey ? (
-              <EyeOff className="h-4 w-4" />
-            ) : (
-              <Eye className="h-4 w-4" />
-            )}
-          </button>
         </div>
       </div>
       <div className="sm:col-span-2 rounded-xl border border-[var(--border)]/60 bg-[var(--muted)]/20">
